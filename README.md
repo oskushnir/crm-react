@@ -2,6 +2,10 @@
 
 A web-based CRM system for managing a beauty salon. The application allows administrators and staff to manage clients, appointments, services, and schedules in a simple and efficient way.
 
+## Demo
+
+👉 [Live Demo](https://oskushnir.github.io/crm-react/)  
+
 ## Features
 
 - Manage client information and visit history  
