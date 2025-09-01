@@ -12,7 +12,7 @@ export const NotFoundPage = () => {
 
   return (
     <div className="flex flex-col gap-4 h-full items-center justify-center col-span-full">
-      <Alert className="flex border-none justify-center items-center text-lg" variant="destructive">
+      <Alert className="flex border-none justify-center items-center text-lg bg-transparent" variant="destructive">
         <AlertCircleIcon />
         <AlertTitle>Page not found or you unfortunatle don't have access to this page.</AlertTitle>
       </Alert>

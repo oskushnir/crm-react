@@ -1,7 +1,7 @@
 export const tableTitles = [
-  "Id",
-  "Name",
-  "Birthday",
-  "Phone number",
-  "Email",
+  { id: 'id', title: 'Id' },
+  { id: 'firstName', title: 'Name' },
+  { id: 'birthday', title: 'Birthday' },
+  { id: 'phoneNumber', title: 'Phone' },
+  { id: 'email', title: 'Email' },
 ];

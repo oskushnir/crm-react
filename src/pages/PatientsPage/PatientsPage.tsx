@@ -1,9 +1,7 @@
-import { TableClients } from "@/components/Table";
+import { TablePatients } from "@/components/TablePeople";
 
 export const PatientsPage = () => {
   return (
-    <div className="col-span-full">
-      <TableClients />
-    </div>
+    <TablePatients />
   );
 }

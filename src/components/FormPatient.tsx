@@ -87,6 +87,7 @@ function FormClient({
                         : undefined
                   }
                   setBirthday={(date) => setFieldValue("birthday", date)}
+                  label="Select date"
                 />
 
                 <ErrorMessage name="birthday" component="span" className="errorFormMessage" />

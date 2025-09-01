@@ -9,9 +9,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function CalendarOfBirth({ birthday, setBirthday }: {
+export function CalendarOfBirth({ birthday, setBirthday, label }: {
   birthday: Date | undefined,
   setBirthday: (date: Date | undefined) => void,
+  label?: string
 }) {
   const [open, setOpen] = React.useState(false)
 
@@ -24,7 +25,7 @@ export function CalendarOfBirth({ birthday, setBirthday }: {
             id="date"
             className="justify-between font-normal"
           >
-            {birthday ? birthday.toLocaleDateString() : "Select date"}
+            {birthday ? birthday.toLocaleDateString() : label}
             <ChevronDownIcon />
           </Button>
         </PopoverTrigger>
