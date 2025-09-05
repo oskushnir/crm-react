@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { selectItems } from "@/utils/selectItems";
 
 type Props = {
   limit: string;
@@ -22,11 +23,11 @@ export function Selector({ limit, updateLimit }: Props) {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Per page</SelectLabel>
-          <SelectItem value="10">10 / page</SelectItem>
-          <SelectItem value="20">20 / page</SelectItem>
-          <SelectItem value="30">30 / page</SelectItem>
-          <SelectItem value="40">40 / page</SelectItem>
-          <SelectItem value="50">50 / page</SelectItem>
+          {selectItems.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>

@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
-import { Navigation } from "./components/Navigation";
+import { Navigation } from "./components/AppSideBar";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 export const App = () => {

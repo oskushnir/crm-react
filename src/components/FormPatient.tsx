@@ -2,11 +2,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button";
 import { Formik, Form, ErrorMessage } from "formik";
-import { z } from "zod";
 import { DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { CalendarOfBirth } from "./Calendar";
 import type { PatientFormValues } from "@/types/PatientFormValues";
 import { Spinner } from "./Spinner";
+import { clientFormSchema } from "@/utils/schemas";
 
 function FormClient({
   isEditMode,
@@ -21,32 +21,29 @@ function FormClient({
   loading: boolean,
   newPatientError: boolean,
 }) {
+  const toDateOrUndefined = (value: unknown): Date | undefined => {
+    if (value instanceof Date) {
+      return value;
+    }
 
-  const clientFormSchema = z.object({
-    firstName: isEditMode ? z.string().trim() : z.string().trim().min(2, "First name must be at least 2 characters long").regex(/^[a-zA-Z]+$/, "First name must contain only letters"),
-    lastName: isEditMode ? z.string().trim() : z.string().trim().min(2, "Last name must be at least 2 characters long").regex(/^[a-zA-Z]+$/, "Last name must contain only letters"),
-    birthday: isEditMode ? z.date().nullable() : z.date({
-      required_error: "Birthday is required",
-      invalid_type_error: "Invalid date format",
-    }),
-    phoneNumber: isEditMode ? z.string().trim() : z.string().trim().regex(/^\+?[0-9\s-]+$/, "Phone number must be a valid format"),
-    email: isEditMode ? z.string().trim() : z.string().trim().email("Email must be a valid email address"),
-  });
+    if (value) {
+      return new Date(value as string);
+    }
+
+    return undefined;
+  };
 
   return (
     <Formik
       initialValues={initialValues}
       enableReinitialize
+      validateOnMount
       onSubmit={(values) => onNext(values)}
       validate={(values) => {
         const parsedValues = {
           ...values,
           birthday:
-            values.birthday instanceof Date
-              ? values.birthday
-              : values.birthday
-                ? new Date(values.birthday)
-                : null,
+            toDateOrUndefined(values.birthday),
         };
 
         const result = clientFormSchema.safeParse(parsedValues);
@@ -55,7 +52,7 @@ function FormClient({
         return result.error.flatten().fieldErrors;
       }}
     >
-      {({ values, handleChange, setFieldValue }) => (
+      {({ values, handleChange, setFieldValue, dirty, isValid, isSubmitting }) => (
         <Form>
           <div className="grid gap-4">
             <div className="grid gap-4">
@@ -80,11 +77,7 @@ function FormClient({
 
                 <CalendarOfBirth
                   birthday={
-                    values.birthday instanceof Date
-                      ? values.birthday
-                      : values.birthday
-                        ? new Date(values.birthday)
-                        : undefined
+                    toDateOrUndefined(values.birthday)
                   }
                   setBirthday={(date) => setFieldValue("birthday", date)}
                   label="Select date"
@@ -115,7 +108,7 @@ function FormClient({
                 <Button variant={"outline"}>{isEditMode ? 'Close' : 'Cancel'}</Button>
               </DialogClose>
 
-              <Button className="text-white" disabled={loading} type="submit">
+              <Button className="text-white" disabled={loading || isSubmitting || !dirty || !isValid} type="submit">
                 {loading && !newPatientError ? <Spinner size={15} /> : isEditMode ? 'Save' : 'Next'}
               </Button>
             </DialogFooter>

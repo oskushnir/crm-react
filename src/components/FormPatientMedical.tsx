@@ -5,13 +5,7 @@ import { z } from "zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import Combobox from "./Combobox";
 import { Spinner } from "./Spinner";
-
-const clientFormMedicalSchema = z.object({
-  allergic: z.string().trim(),
-  chronicDiseases: z.string().trim(),
-  takingMedication: z.string().trim(),
-  skinDiseases: z.string().trim(),
-});
+import { clientFormMedicalSchema } from "@/utils/schemas";
 
 type ClientFormMedicalValues = z.infer<typeof clientFormMedicalSchema>;
 
@@ -25,7 +19,7 @@ function FormMedicalClient({
 }: {
   isEditMode?: boolean,
   initialValues: ClientFormMedicalValues,
-  onBack: () => void,
+  onBack?: () => void,
   onSubmit: (values: ClientFormMedicalValues) => void,
   loading?: boolean,
   error?: boolean,
@@ -41,7 +35,7 @@ function FormMedicalClient({
         return result.error.flatten().fieldErrors;
       }}
     >
-      {({ values, setFieldValue }) => (
+      {({ values, setFieldValue, dirty, isValid, isSubmitting }) => (
         <Form>
           <div className="grid gap-4">
             <div className="grid gap-6">
@@ -73,15 +67,14 @@ function FormMedicalClient({
             <DialogFooter>
               <Button variant={"outline"} type="button" onClick={onBack}>{isEditMode ? 'Close' : 'Back'}</Button>
 
-              <Button className="text-white" disabled={loading} type="submit">
+              <Button className="text-white" disabled={loading || isSubmitting || !dirty || !isValid} type="submit">
                 {loading && !error ? <Spinner size={15} /> : isEditMode ? 'Save' : "Add Medical History"}
               </Button>
             </DialogFooter>
           </div>
-          </Form>
+        </Form>
       )}
-        </Formik>
-        
+    </Formik>
   );
 }
 

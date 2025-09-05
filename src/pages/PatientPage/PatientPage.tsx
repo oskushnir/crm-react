@@ -1,11 +1,13 @@
-import { getPatient } from "@/api/patients";
+import { deletePatientMedicalHistory } from "@/api/medicalHistory";
+import { deletePatient, getPatient } from "@/api/patients";
 import { DeletePatientButton } from "@/components/DeletePatientButton";
-import { DialogForAddClient } from "@/components/Dialog";
 import { Spinner } from "@/components/Spinner";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { UpdatePatientDialog } from "@/components/UpdatePatientDialog";
+import { usePushMessage } from "@/hooks/use-push-message";
 import type { Patient } from "@/types/Patients";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -24,6 +26,42 @@ export const PatientPage = () => {
     return medicalHistory.join(", ") || "Empty";
   };
 
+  const pushMessage = usePushMessage();
+
+  const mutationDeleteMedicalHistory = useMutation({
+    mutationFn: deletePatientMedicalHistory,
+  });
+
+  const mutationDeletePatient = useMutation({
+    mutationFn: deletePatient,
+  });
+
+  const handleDelete = async () => {
+    try {
+      await mutationDeleteMedicalHistory.mutateAsync(Number(patientId));
+      await mutationDeletePatient.mutateAsync(Number(patientId));
+
+      pushMessage({
+        success: true,
+        title: "Patient deleted successfully",
+        description: "The patient and their medical history have been removed.",
+      });
+
+      navigate("/patients");
+    } catch (error) {
+      const err = error as Error;
+
+      pushMessage({
+        success: false,
+        title: "Error deleting patient",
+        description: err.message || "An error occurred while deleting the patient.",
+      });
+    }
+  };
+
+  const isLoading =
+    mutationDeletePatient.isPending || mutationDeleteMedicalHistory.isPending;
+
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="w-full py-4">
@@ -34,7 +72,7 @@ export const PatientPage = () => {
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-[500px] gap-4">
-            <Alert className="flex border-none justify-center items-center" variant="destructive">
+            <Alert className="flex border-none justify-center items-center bg-transparent" variant="destructive">
               <AlertCircleIcon />
               <AlertTitle className="font-bold text-2xl">Unable to load patient details.</AlertTitle>
             </Alert>
@@ -64,14 +102,13 @@ export const PatientPage = () => {
             <div className="flex flex-col justify-center items-center gap-8">
               <div className="flex gap-8">
                 {patientData && (
-                  <DialogForAddClient
-                    isEditMode={true}
+                  <UpdatePatientDialog
                     patientIdToEdit={Number(patientId)}
                     patientDataToEdit={patientData}
                   />
                 )}
 
-                <DeletePatientButton patientId={Number(patientId)} />
+                <DeletePatientButton isLoading={isLoading} handleDelete={handleDelete} />
               </div>
             </div>
           </div>

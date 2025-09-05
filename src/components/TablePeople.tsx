@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/alert"
 import { AlertCircleIcon, Search, SortAscIcon, SortDescIcon } from "lucide-react"
 import { tableTitles } from "@/utils/tableTitles";
-import { DialogForAddClient } from "./Dialog";
 import { PaginationClients } from "./Pagination";
 import { Selector } from "./Selector";
 import type { Patient } from "@/types/Patients";
@@ -25,20 +24,13 @@ import { useCallback, useEffect, useState } from "react";
 import debounce from "lodash.debounce";
 import { CalendarOfBirth } from "./Calendar";
 import { Button } from "./ui/button";
+import { parseUkDate } from "@/utils/parseUkDate";
+import { CreatePatientDialog } from "./CreatePatientDialog";
 
 export function TablePatients() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filterQuery, setFilterQuery] = useState(searchParams.get("search") || "");
-  const [appliedFilterQuery, setAppliedFilterQuery] = useState(searchParams.get("search") || "");
-
-  const parseUkDate = (s?: string | null): Date | undefined => {
-    if (!s) return undefined;
-    const m = s.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-    if (!m) return undefined;
-    const [, dd, mm, yyyy] = m;
-    const d = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-    return isNaN(d.getTime()) ? undefined : d;
-  };
+  const [filterQuery, setFilterQuery] = useState<string | null>(searchParams.get("search"));
+  const [appliedFilterQuery, setAppliedFilterQuery] = useState<string | null>(searchParams.get("search"));
 
   const [birthdayFrom, setBirthdayFrom] = useState<Date | undefined>(() =>
     parseUkDate(searchParams.get("birthdayFrom"))
@@ -48,10 +40,10 @@ export function TablePatients() {
   );
 
   const initSortBy = searchParams.get('sortBy') || undefined;
-  const initSortOrder = (searchParams.get('sortOrder') as "ASC" | "DESC" | null) || undefined;
+  const initSortOrder = (searchParams.get('sortOrder') as "ASC" | "DESC");
 
   const [sortBy, setSortBy] = useState<string | undefined>(initSortBy);
-  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC" | undefined>(initSortOrder);
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">(initSortOrder);
 
   const navigate = useNavigate();
 
@@ -63,7 +55,7 @@ export function TablePatients() {
 
   const { isPending, error, data: arrayPatients } = useQuery({
     queryKey: ['patients', currentPage, limit, appliedFilterQuery, birthdayFrom, birthdayTo, sortBy, sortOrder],
-    queryFn: () => getAllPatients(currentPage, +limit, appliedFilterQuery, birthdayFromISO, birthdayToISO, sortBy, sortOrder),
+    queryFn: () => getAllPatients(currentPage, +limit, appliedFilterQuery || undefined, birthdayFromISO, birthdayToISO, sortBy, sortOrder),
   });
 
   const updatePage = (newPage: number) => {
@@ -73,7 +65,6 @@ export function TablePatients() {
 
   const updateLimit = (newLimit: string) => {
     searchParams.set("limit", newLimit.toString());
-    searchParams.set("page", "1");
     setSearchParams(searchParams);
   }
 
@@ -101,7 +92,10 @@ export function TablePatients() {
     setSearchParams(searchParams);
   }
 
-  const applyQuery = useCallback(debounce(setAppliedFilterQuery, 500), []);
+  const applyQuery = useCallback(                              // eslint-disable-line react-hooks/exhaustive-deps
+    debounce((q: string) => setAppliedFilterQuery(q), 500),
+    []
+  );
 
   const handleQueryChange = (query: string) => {
     setFilterQuery(query);
@@ -111,7 +105,6 @@ export function TablePatients() {
       searchParams.delete("search");
     } else {
       searchParams.set("search", query);
-      searchParams.set("page", "1");
     }
     setSearchParams(searchParams);
   }
@@ -141,6 +134,10 @@ export function TablePatients() {
   useEffect(() => () => applyQuery.cancel(), [applyQuery]);
 
   useEffect(() => {
+    searchParams.set("page", "1");
+  }, [filterQuery, birthdayFrom, birthdayTo, limit, sortBy, sortOrder]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     const page = searchParams.get('page');
     const limit = searchParams.get('limit');
 
@@ -160,7 +157,7 @@ export function TablePatients() {
   }, [searchParams, setSearchParams]);
 
   return (
-    <div className="gap-6 flex flex-col border p-6 rounded-2xl">
+    <div className="gap-6 flex flex-col border p-6 rounded-2xl min-h-[830px]">
       <div className="flex flex-col gap-6">
         <div className="flex justify-between items-center">
           <div>
@@ -168,7 +165,7 @@ export function TablePatients() {
             <p>Here you can view detailed information about each patient</p>
           </div>
 
-          {<DialogForAddClient />}
+          {<CreatePatientDialog />}
         </div>
 
         <div className="flex items-center gap-[50%]">
@@ -280,7 +277,7 @@ export function TablePatients() {
         </Table>
       </div>
 
-      {!isPending && !error &&
+      {!isPending && !error && arrayPatients?.data.length !== 0 &&
         <div className="flex flex-col xl:flex-row items-center justify-between gap-5 mt-2 bg-[var(--primary-foreground)] rounded-lg p-3">
           <Selector
             limit={limit}

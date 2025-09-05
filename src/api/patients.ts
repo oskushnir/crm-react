@@ -5,7 +5,7 @@ import type { AxiosError } from "axios";
 export async function getAllPatients(
   page: number,
   limit: number,
-  search: string,
+  search?: string,
   birthdayFrom?: string,
   birthdayTo?: string,
   sortBy?: string,
@@ -15,11 +15,11 @@ export async function getAllPatients(
     params: {
       page,
       limit,
-      search: search || undefined,
-      birthdayFrom: birthdayFrom || undefined,
-      birthdayTo: birthdayTo || undefined,
-      sortBy: sortBy || undefined,
-      sortOrder: sortOrder || undefined,
+      search: search,
+      birthdayFrom: birthdayFrom,
+      birthdayTo: birthdayTo,
+      sortBy: sortBy,
+      sortOrder: sortOrder,
     },
   });
 

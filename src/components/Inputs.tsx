@@ -14,7 +14,7 @@ type Props = {
   htmlFor?: string;
   requiredLabel?: boolean;
   containerClassName?: string;
-  query: string;
+  query: string | null;
   handleQueryChange: (query: string) => void;
 };
 
@@ -54,7 +54,7 @@ const Inputs: React.FC<Props> = ({
         )}
 
         <Input
-          value={query}
+          value={query ?? ""}
           onChange={(e) => handleQueryChange(e.target.value)}
           name={name}
           id={id}
